@@ -337,12 +337,39 @@
   .note-card em { color: var(--accent); font-style: normal; }
 
   .retake-btn {
-    display: block; margin: 20px auto 60px; background: transparent;
+    display: inline-block; margin: 0 8px; background: transparent;
     color: var(--accent); border: 1px solid rgba(167,139,250,0.3);
     padding: 14px 40px; font-size: 0.95rem; font-weight: 600;
     border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.25s;
   }
   .retake-btn:hover { background: var(--accent-dim); border-color: var(--accent); box-shadow: var(--glow); }
+
+  .pdf-btn {
+    display: inline-flex; align-items: center; gap: 8px; margin: 0 8px;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6); color: #fff;
+    border: none; padding: 14px 36px; font-size: 0.95rem; font-weight: 700;
+    border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(167,139,250,0.3);
+  }
+  .pdf-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(167,139,250,0.4); }
+  .pdf-btn svg { width: 18px; height: 18px; }
+
+  .results-actions {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;
+    margin: 20px auto 60px; padding: 0 20px;
+  }
+
+  @media print {
+    *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    body { background: #0a0e17 !important; }
+    body::after { display: none !important; }
+    .results-actions, .retake-btn, .pdf-btn { display: none !important; }
+    .container { margin: 0 auto; padding: 0 20px; }
+    .results-hero, .top-result, .desc-card, .section-label, .wv-cards, .wv-card,
+    .note-card, .all-scores, .score-row, .anim-in { break-inside: avoid; page-break-inside: avoid; }
+    .bar-inner { transition: none !important; }
+    @page { size: A4; margin: 1.5cm; }
+  }
 
   @media (max-width: 640px) {
     .likert-scale { gap: 5px; }
@@ -638,7 +665,10 @@ function calculateResults() {
     <div class="section-label" style="margin-top:32px">Worldview Descriptions</div>
     ${allDescHTML}
     <div class="note-card anim-in"><p><strong>Note:</strong> The SAWV-II (\u00A9 Ibrahim & Owen, 1994) measures worldview dimensions across Human Nature, Social Relations, Time, Activity, and Nature orientations. Your highest score indicates your dominant worldview. Scores are calculated as the average rating across each subscale's items (sum \u00F7 number of items). Use these results for self-reflection and cultural self-awareness.</p></div>
-    <button class="retake-btn" onclick="location.reload()">Retake Assessment</button>`;
+    <div class="results-actions">
+      <button class="pdf-btn" onclick="downloadPDF()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download as PDF</button>
+      <button class="retake-btn" onclick="location.reload()">Retake Assessment</button>
+    </div>`;
 
   results.style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -646,6 +676,14 @@ function calculateResults() {
   setTimeout(() => {
     document.querySelectorAll('.bar-inner').forEach(bar => { bar.style.width = bar.dataset.width + '%'; });
   }, 300);
+}
+
+function downloadPDF() {
+  document.querySelectorAll('.bar-inner').forEach(bar => {
+    bar.style.width = bar.dataset.width + '%';
+    bar.style.transition = 'none';
+  });
+  setTimeout(() => { window.print(); }, 150);
 }
 </script>
 </body>
