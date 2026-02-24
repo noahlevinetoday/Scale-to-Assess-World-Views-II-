@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scale to Assess World Views II</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e17;
+    --bg2: #0f1420;
+    --card: #141a28;
+    --card-border: #1e2740;
+    --accent: #a78bfa;
+    --accent-dim: rgba(167,139,250,0.12);
+    --accent-glow: rgba(167,139,250,0.25);
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.1);
+    --green: #00e5a0;
+    --pink: #f472b6;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #475569;
+    --border: #1e293b;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+    --glow: 0 0 20px rgba(167,139,250,0.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 9999;
+  }
+
+  .hero {
+    position: relative; padding: 70px 24px 100px; text-align: center;
+    overflow: hidden; background: linear-gradient(180deg, #12091f 0%, var(--bg) 100%);
+  }
+
+  .hero::before {
+    content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(167,139,250,0.07) 0%, rgba(0,212,255,0.03) 40%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(167,139,250,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  }
+
+  .hero .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent-dim); border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 100px; padding: 6px 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 20px; position: relative;
+  }
+
+  .tag .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--accent); }
+    50% { opacity: 0.4; box-shadow: none; }
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -1px;
+    margin-bottom: 14px; position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .hero .subtitle {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--accent);
+    margin-bottom: 10px; position: relative; letter-spacing: 0.5px;
+  }
+
+  .hero p {
+    font-size: 1.05rem; color: var(--text-muted); max-width: 540px;
+    margin: 0 auto 24px; position: relative; font-weight: 300;
+  }
+
+  .kbd-hint {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); position: relative;
+  }
+
+  .kbd-hint kbd {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 6px;
+    padding: 3px 8px; font-size: 0.72rem; color: var(--text-muted); box-shadow: 0 2px 0 var(--border);
+  }
+
+  .container { max-width: 780px; margin: -50px auto 40px; padding: 0 20px; position: relative; }
+
+  /* Progress */
+  .progress-bar-container {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 18px 22px; margin-bottom: 20px; position: sticky; top: 10px; z-index: 100;
+    backdrop-filter: blur(12px); box-shadow: var(--shadow-lg);
+  }
+
+  .progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .progress-info span { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-dim); }
+  .progress-info strong { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; }
+
+  .progress-track { height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--pink));
+    border-radius: 100px; width: 0%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 12px rgba(167,139,250,0.4);
+  }
+
+  /* Legend */
+  .scale-legend {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 18px 22px; margin-bottom: 20px;
+  }
+
+  .legend-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600;
+    color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+  }
+
+  .legend-items { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+
+  .legend-items span {
+    font-size: 0.82rem; color: #94a3b8; display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  .legend-items kbd {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 7px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    color: var(--accent); box-shadow: 0 2px 0 var(--border); min-width: 22px; text-align: center;
+  }
+
+  /* Question Cards */
+  .question-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 26px 28px; margin-bottom: 12px; transition: all 0.3s ease;
+    position: relative; overflow: hidden; outline: none;
+  }
+
+  .question-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: transparent; transition: background 0.3s;
+  }
+
+  .question-card:focus-within { border-color: rgba(167,139,250,0.3); box-shadow: 0 0 0 1px rgba(167,139,250,0.1), var(--glow); }
+  .question-card:focus-within::before { background: var(--accent); }
+  .question-card.answered::before { background: var(--accent); }
+  .question-card.answered { border-color: rgba(167,139,250,0.15); }
+
+  .question-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+
+  .question-number {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600;
+    color: var(--accent); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
+  }
+
+  .question-text { font-size: 0.95rem; font-weight: 400; margin-bottom: 20px; line-height: 1.6; color: #cbd5e1; }
+
+  .likert-scale { display: flex; gap: 6px; }
+  .likert-scale label { flex: 1; text-align: center; cursor: pointer; }
+  .likert-scale input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+
+  .likert-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px 4px; border: 1px solid var(--border); border-radius: 10px;
+    transition: all 0.2s ease; user-select: none; min-height: 62px; background: var(--bg2);
+  }
+
+  .likert-btn .num {
+    display: block; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem;
+    font-weight: 700; color: var(--text-muted); margin-bottom: 1px; transition: color 0.2s;
+  }
+
+  .likert-btn .lbl {
+    font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.2px;
+    text-transform: uppercase; transition: color 0.2s; line-height: 1.15;
+    max-width: 100%; word-wrap: break-word;
+  }
+
+  .likert-scale label:hover .likert-btn { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.05); }
+  .likert-scale label:hover .likert-btn .num { color: var(--accent); }
+
+  .likert-scale input[type="radio"]:checked + .likert-btn {
+    border-color: var(--accent); background: var(--accent-dim);
+    box-shadow: 0 0 12px rgba(167,139,250,0.15), inset 0 0 12px rgba(167,139,250,0.05);
+  }
+  .likert-scale input[type="radio"]:checked + .likert-btn .num { color: var(--accent); }
+  .likert-scale input[type="radio"]:checked + .likert-btn .lbl { color: var(--accent); }
+
+  /* Submit */
+  .submit-section { text-align: center; padding: 50px 0; }
+
+  .submit-btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6); color: #fff;
+    border: none; padding: 16px 52px; font-size: 1rem; font-weight: 700;
+    border-radius: 12px; cursor: pointer; font-family: inherit; letter-spacing: 0.5px;
+    transition: all 0.25s; box-shadow: 0 4px 24px rgba(167,139,250,0.3);
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(167,139,250,0.4); }
+
+  .unanswered-msg {
+    color: #f87171; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; margin-top: 14px; display: none;
+  }
+
+  /* ===== RESULTS ===== */
+  #results { display: none; }
+
+  .results-hero { text-align: center; margin-bottom: 36px; }
+  .results-hero h2 {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+  }
+  .results-hero p { color: var(--text-muted); font-weight: 300; }
+
+  .top-result {
+    position: relative; border-radius: 20px; padding: 44px 32px; text-align: center;
+    margin-bottom: 20px; background: var(--card); border: 1px solid rgba(167,139,250,0.2); overflow: hidden;
+  }
+  .top-result::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .top-result .icon {
+    width: 52px; height: 52px; margin: 0 auto 14px;
+    background: var(--accent-dim); border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; position: relative;
+  }
+  .top-result .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; position: relative;
+  }
+  .top-result h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; position: relative; }
+  .top-result .score-big {
+    font-family: 'JetBrains Mono', monospace; font-size: 3rem; font-weight: 700;
+    color: var(--accent); position: relative; line-height: 1;
+  }
+  .top-result .score-big .max { font-size: 1.1rem; color: var(--text-dim); font-weight: 400; }
+
+  .desc-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 22px 26px; margin-bottom: 20px; font-size: 0.9rem;
+    color: #94a3b8; line-height: 1.75; border-left: 3px solid var(--accent);
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);
+    margin-bottom: 14px; text-align: center;
+  }
+
+  .wv-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px;
+  }
+
+  .wv-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 22px 18px; text-align: center; position: relative; overflow: hidden;
+  }
+  .wv-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .wv-card .rank {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--cyan);
+    margin-bottom: 4px; position: relative;
+  }
+  .wv-card .wv-name { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; position: relative; color: #e2e8f0; }
+  .wv-card .wv-subtitle { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 6px; position: relative; }
+  .wv-card .score {
+    font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700;
+    color: var(--cyan); position: relative;
+  }
+  .wv-card .score .max { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
+
+  .all-scores {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 28px; margin-bottom: 20px;
+  }
+  .all-scores h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: #e2e8f0; }
+
+  .score-row {
+    display: flex; align-items: center; gap: 14px; padding: 12px 0;
+    border-bottom: 1px solid rgba(30,41,59,0.6);
+  }
+  .score-row:last-child { border-bottom: none; }
+
+  .score-row .rk {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600;
+    color: var(--text-dim); width: 24px; text-align: center; flex-shrink: 0;
+  }
+  .score-row .name { flex: 1; font-size: 0.9rem; font-weight: 500; color: #cbd5e1; }
+  .score-row .bar-wrap { flex: 1.2; height: 10px; background: var(--border); border-radius: 100px; overflow: hidden; }
+  .score-row .bar-inner { height: 100%; border-radius: 100px; transition: width 1s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+  .score-row .val {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600;
+    color: var(--accent); width: 52px; text-align: right; flex-shrink: 0;
+  }
+
+  .note-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+    padding: 22px 26px; margin-bottom: 20px; font-size: 0.85rem;
+    color: #94a3b8; line-height: 1.7;
+  }
+  .note-card strong { color: #cbd5e1; }
+  .note-card em { color: var(--accent); font-style: normal; }
+
+  .retake-btn {
+    display: block; margin: 20px auto 60px; background: transparent;
+    color: var(--accent); border: 1px solid rgba(167,139,250,0.3);
+    padding: 14px 40px; font-size: 0.95rem; font-weight: 600;
+    border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.25s;
+  }
+  .retake-btn:hover { background: var(--accent-dim); border-color: var(--accent); box-shadow: var(--glow); }
+
+  @media (max-width: 640px) {
+    .likert-scale { gap: 5px; }
+    .likert-scale label { }
+    .likert-btn { min-height: 52px; padding: 8px 2px; }
+    .likert-btn .lbl { display: none; }
+    .question-card { padding: 20px 18px; }
+    .wv-cards { grid-template-columns: 1fr; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .anim-in { animation: fadeUp 0.5s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="grid-bg"></div>
+  <div class="tag"><span class="dot"></span> Worldview Assessment</div>
+  <h1>Scale to Assess World Views II</h1>
+  <div class="subtitle">Ibrahim & Owen (1994)</div>
+  <p>Assess your attitudes toward the world and people across four worldview dimensions. There are no right or wrong answers — the best answer is what you feel is true of yourself.</p>
+  <div class="kbd-hint">
+    <kbd>1</kbd>–<kbd>5</kbd> to select &nbsp;·&nbsp; <kbd>Tab</kbd> next question
+  </div>
+</div>
+
+<div class="container" id="quiz-section">
+  <div class="progress-bar-container">
+    <div class="progress-info">
+      <span>Progress</span>
+      <strong id="progress-text">0 / 30</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="scale-legend">
+    <div class="legend-title">Rating Scale</div>
+    <div class="legend-items">
+      <span><kbd>1</kbd> Strongly Disagree</span>
+      <span><kbd>2</kbd> Disagree</span>
+      <span><kbd>3</kbd> Undecided</span>
+      <span><kbd>4</kbd> Agree</span>
+      <span><kbd>5</kbd> Strongly Agree</span>
+    </div>
+  </div>
+
+  <div id="questions-list"></div>
+
+  <div class="submit-section">
+    <button class="submit-btn" onclick="calculateResults()">View My Results</button>
+    <p class="unanswered-msg" id="unanswered-msg"></p>
+  </div>
+</div>
+
+<div class="container" id="results"></div>
+
+<script>
+const questions = [
+  "No weakness or difficulty can hold us back if we have enough will power.",
+  "Human nature being what it is there will always be war and conflict.",
+  "Women who want to remove the word obey from the marriage service do not understand what it means to be a wife.",
+  "The past is no more, the future may never be, the present is all we can be certain of.",
+  "Beneath the polite and smiling surface of human nature is a bottomless pit of evil.",
+  "I believe life is easier in the cities where one has access to all modern amenities.",
+  "When you come right down to it, it is human nature never to do anything without an eye to one's own profit.",
+  "The reason you should not criticize others is that they will turn around and criticize you.",
+  "The forces of nature are powerful enough to destroy everything that people can build.",
+  "If I spend 14 years pursuing my education, I will have a good job in the future.",
+  "Basically, all human beings have a great potential for good.",
+  "The relationship between people and nature is one of mutual coexistence.",
+  "It is important that people be involved in the present rather than concerned with the past or the future.",
+  "The fact that I am in existence is enough for me, I do not necessarily also have to have major accomplishments in life.",
+  "Although people are intrinsically good, they have developed institutions which force them to act in opposition to their basic nature.",
+  "I plan for tomorrow, today is of no consequence, and the past is over with.",
+  "I prefer to relax and enjoy life as it comes.",
+  "The father is the head of the household; every person in the family should follow his lead.",
+  "We are healthier when we live in harmony with our natural world.",
+  "We can find happiness within ourselves.",
+  "Every person has the potential to do good.",
+  "When natural catastrophes occur, we have to accept them.",
+  "Planning for the future allows one to accomplish all of one's goals.",
+  "I believe that feelings and human relationships are the most important things in life.",
+  "Some people will help you and others will try to hurt you.",
+  "Top management should make all the decisions: everyone in the company should follow these directives.",
+  "I feel quite powerless when faced with the forces of nature.",
+  "We need to model our lives after our parents and ancestors and focus on our glorious past.",
+  "I believe it is more important to be a good person rather than a successful person.",
+  "Nowadays, a person has to live pretty much for today and let tomorrow take care of itself."
+];
+
+const scaleLabels = ["Strongly Disagree", "Disagree", "Undecided", "Agree", "Strongly Agree"];
+const TOTAL_Q = 30;
+const MAX_VAL = 5;
+
+// Subscales: item numbers (1-indexed), and divisor
+const subscales = {
+  "Optimistic (OWV I)": { items: [1,11,12,19,20,21,22,24,29], divisor: 9 },
+  "Traditional (TWV II)": { items: [3,6,7,8,10,16,18,23,26,28], divisor: 10 },
+  "Spontaneous (SWV III)": { items: [4,13,14,17,28,30], divisor: 6 },
+  "Pessimistic (PWV IV)": { items: [2,5,7,9,15,25,27], divisor: 7 }
+};
+
+const wvColors = {
+  "Optimistic (OWV I)": "#00e5a0",
+  "Traditional (TWV II)": "#fb923c",
+  "Spontaneous (SWV III)": "#00d4ff",
+  "Pessimistic (PWV IV)": "#f472b6"
+};
+
+const wvShortNames = {
+  "Optimistic (OWV I)": "Optimistic",
+  "Traditional (TWV II)": "Traditional",
+  "Spontaneous (SWV III)": "Spontaneous",
+  "Pessimistic (PWV IV)": "Pessimistic"
+};
+
+const wvDescriptions = {
+  "Optimistic (OWV I)": "This perspective is characterized by a belief that human nature is essentially good. Activity must focus on inner and outer development (spiritual and material). There is a need to be in harmony with nature, with an acceptance of the power of nature. This is a very common worldview among US-born individuals — reflect on whether this represents your ideal values as propagated by culture, or how you actually live day to day.",
+  "Traditional (TWV II)": "The emphasis in this perspective is on hierarchical social relations (top-down), future time orientation with some attention to the past, and a belief that nature can be controlled. This Calvinistic point of view represents patriarchal power relationships, social control, and a very strong future orientation. This perspective is found in highly traditional societies where controlling the social system is valued for the good of social order.",
+  "Spontaneous (SWV III)": "This worldview reflects an activity focus on spontaneity and a time emphasis mainly on the present, with some attention to the past. It emerged largely after the Vietnam War era and reflects the social movements of the 1960s and 1970s that challenged Calvinistic assumptions. There is also an influence of Gestalt philosophy (\"here and now\") and Eastern philosophy with a focus on meditation, self-monitoring, and being spontaneous rather than rigid.",
+  "Pessimistic (PWV IV)": "This perspective reflects a view that human nature is primarily bad (with some allowance for good-bad combinations), acceptance of nature's power, and collateral-mutual relationship orientations. Note: Research has shown that women and culturally non-dominant groups often hold this as a secondary worldview. It was reinterpreted as a <strong>realistic</strong> perspective based on the actual constraints of a person's life — including limits that gender, sexual orientation, SES, religion, or other social factors may impose."
+};
+
+// Build questions
+const qContainer = document.getElementById('questions-list');
+questions.forEach((q, i) => {
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = `q-card-${i+1}`;
+  card.setAttribute('tabindex', '0');
+  card.dataset.qnum = i + 1;
+
+  let radios = '';
+  for (let v = 1; v <= 5; v++) {
+    radios += `<label><input type="radio" name="q${i+1}" value="${v}" onchange="onAnswer(${i+1})"><span class="likert-btn"><span class="num">${v}</span><span class="lbl">${scaleLabels[v-1]}</span></span></label>`;
+  }
+
+  card.innerHTML = `<div class="question-header"><span class="question-number">Q${String(i+1).padStart(2,'0')}</span></div><div class="question-text">${q}</div><div class="likert-scale">${radios}</div>`;
+  qContainer.appendChild(card);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  const card = document.activeElement?.closest?.('.question-card') || document.querySelector('.question-card:focus');
+  if (!card) return;
+
+  const qnum = parseInt(card.dataset.qnum);
+  const key = e.key;
+
+  if (key >= '1' && key <= '5') {
+    e.preventDefault();
+    const radio = card.querySelector(`input[name="q${qnum}"][value="${key}"]`);
+    if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
+  }
+
+  if (key === 'Tab' && !e.shiftKey) {
+    const next = document.getElementById(`q-card-${qnum + 1}`);
+    if (next) { e.preventDefault(); next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+
+  if (key === 'Tab' && e.shiftKey) {
+    const prev = document.getElementById(`q-card-${qnum - 1}`);
+    if (prev) { e.preventDefault(); prev.focus(); prev.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+});
+
+function onAnswer(num) {
+  document.getElementById(`q-card-${num}`).classList.add('answered');
+  updateProgress();
+  const next = document.getElementById(`q-card-${num + 1}`);
+  if (next && !next.classList.contains('answered')) {
+    setTimeout(() => { next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
+  }
+}
+
+function updateProgress() {
+  const answered = document.querySelectorAll('.question-card.answered').length;
+  document.getElementById('progress-text').textContent = `${answered} / ${TOTAL_Q}`;
+  document.getElementById('progress-fill').style.width = `${(answered / TOTAL_Q) * 100}%`;
+}
+
+function calculateResults() {
+  const unanswered = [];
+  for (let i = 1; i <= TOTAL_Q; i++) {
+    if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i);
+  }
+  if (unanswered.length > 0) {
+    const msg = document.getElementById('unanswered-msg');
+    msg.style.display = 'block';
+    msg.textContent = `${unanswered.length} unanswered \u2014 starting at Q${unanswered[0]}`;
+    const card = document.getElementById(`q-card-${unanswered[0]}`);
+    card.focus();
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Calculate scores: sum / divisor, rounded to 2 decimals
+  const scores = {};
+  for (const [wv, info] of Object.entries(subscales)) {
+    let total = 0;
+    info.items.forEach(item => {
+      total += parseInt(document.querySelector(`input[name="q${item}"]:checked`).value);
+    });
+    scores[wv] = Math.round((total / info.divisor) * 100) / 100;
+  }
+
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const topScore = sorted[0][1];
+  const primaryTied = sorted.filter(([_, s]) => s === topScore);
+
+  // Build primary section
+  let primaryHTML = '';
+  if (primaryTied.length === 1) {
+    primaryHTML = `
+      <div class="top-result anim-in">
+        <div class="icon">\u25C6</div>
+        <div class="label">Primary Worldview</div>
+        <h3>${wvShortNames[primaryTied[0][0]]}</h3>
+        <div class="score-big">${primaryTied[0][1].toFixed(2)}<span class="max"> / ${MAX_VAL}.00</span></div>
+      </div>
+      <div class="desc-card anim-in">${wvDescriptions[primaryTied[0][0]]}</div>`;
+  } else {
+    primaryHTML = `
+      <div class="top-result anim-in" style="padding-bottom:32px">
+        <div class="icon">\u25C6</div>
+        <div class="label">Tied Primary Worldviews</div>
+        <h3>${primaryTied.map(([n]) => wvShortNames[n]).join(' & ')}</h3>
+        <div class="score-big">${topScore.toFixed(2)}<span class="max"> / ${MAX_VAL}.00</span></div>
+      </div>`;
+    primaryTied.forEach(([name]) => {
+      primaryHTML += `<div class="desc-card anim-in"><strong style="color:var(--accent)">${wvShortNames[name]}:</strong> ${wvDescriptions[name]}</div>`;
+    });
+  }
+
+  // Remaining worldviews
+  const others = sorted.filter(([_, s]) => s < topScore);
+  let othersHTML = '';
+  if (others.length > 0) {
+    let cards = '';
+    let rank = primaryTied.length + 1;
+    // Group by score for ties
+    const otherScores = [...new Set(others.map(([_, s]) => s))].sort((a, b) => b - a);
+    otherScores.forEach(sc => {
+      const atScore = others.filter(([_, s]) => s === sc);
+      atScore.forEach(([name, score]) => {
+        const ordinal = rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`;
+        const tieNote = atScore.length > 1 ? ' (tied)' : '';
+        cards += `
+          <div class="wv-card">
+            <div class="rank">${ordinal}${tieNote}</div>
+            <div class="wv-name">${wvShortNames[name]}</div>
+            <div class="wv-subtitle">${name}</div>
+            <div class="score">${score.toFixed(2)}<span class="max"> / ${MAX_VAL}.00</span></div>
+          </div>`;
+      });
+      rank += atScore.length;
+    });
+
+    othersHTML = `
+      <div class="section-label">All Worldview Scores</div>
+      <div class="wv-cards anim-in" style="${others.length > 2 ? 'grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))' : ''}">${cards}</div>`;
+  }
+
+  // Bar chart
+  let allRows = '';
+  sorted.forEach(([wv, score], i) => {
+    const pct = (score / MAX_VAL) * 100;
+    const color = wvColors[wv] || '#a78bfa';
+    const tiedWith = sorted.filter(([_, s]) => s === score);
+    const tieTag = tiedWith.length > 1 ? ' <span style="color:var(--text-dim);font-size:0.68rem">(tied)</span>' : '';
+    allRows += `<div class="score-row"><div class="rk">${i+1}</div><div class="name">${wv}${tieTag}</div><div class="bar-wrap"><div class="bar-inner" data-width="${pct}" style="background:${color}"></div></div><div class="val">${score.toFixed(2)}</div></div>`;
+  });
+
+  // All descriptions
+  let allDescHTML = '';
+  sorted.forEach(([wv]) => {
+    allDescHTML += `<div class="desc-card anim-in" style="border-left-color:${wvColors[wv]}"><strong style="color:${wvColors[wv]}">${wvShortNames[wv]} Worldview</strong><br><br>${wvDescriptions[wv]}</div>`;
+  });
+
+  document.getElementById('quiz-section').style.display = 'none';
+  const results = document.getElementById('results');
+  results.innerHTML = `
+    <div class="results-hero anim-in"><h2>Your Worldview Profile</h2><p>Based on your 30 responses</p></div>
+    ${primaryHTML}
+    ${othersHTML}
+    <div class="all-scores anim-in"><h3>Score Comparison</h3>${allRows}</div>
+    <div class="section-label" style="margin-top:32px">Worldview Descriptions</div>
+    ${allDescHTML}
+    <div class="note-card anim-in"><p><strong>Note:</strong> The SAWV-II (\u00A9 Ibrahim & Owen, 1994) measures worldview dimensions across Human Nature, Social Relations, Time, Activity, and Nature orientations. Your highest score indicates your dominant worldview. Scores are calculated as the average rating across each subscale's items (sum \u00F7 number of items). Use these results for self-reflection and cultural self-awareness.</p></div>
+    <button class="retake-btn" onclick="location.reload()">Retake Assessment</button>`;
+
+  results.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  setTimeout(() => {
+    document.querySelectorAll('.bar-inner').forEach(bar => { bar.style.width = bar.dataset.width + '%'; });
+  }, 300);
+}
+</script>
+</body>
+</html>
